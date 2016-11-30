@@ -2,8 +2,13 @@ import React, { Component, PropTypes } from 'react';
 
 
 class Suggest extends Component {		
+	constructor(props) {
+		super(props);
+		this.state = { value: props.defaultValue };
+	};
+
 	getValue() {
-		return this.refs.lowlevelinput.value;
+		return this.state.value;
 	};
 
 	render() {
@@ -13,7 +18,7 @@ class Suggest extends Component {
 				<input
 					list={randomid}
 					defaultValue={this.props.defaultValue}
-					ref="lowlevelinput"
+					onChange={e => this.setState({ value: e.target.value })}
 					id={this.props.id} />
 				<datalist id={randomid}>{
 					this.props.options.map((item, idx) =>
