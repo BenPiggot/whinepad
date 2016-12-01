@@ -50,7 +50,6 @@ var Rating = function (_Component) {
 	}, {
 		key: 'setRating',
 		value: function setRating(rating) {
-			debugger;
 			this.setState({
 				tmpRating: rating,
 				rating: rating
