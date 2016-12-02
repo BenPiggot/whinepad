@@ -28,6 +28,10 @@ var _FormInput = require('./components/FormInput');
 
 var _FormInput2 = _interopRequireDefault(_FormInput);
 
+var _Actions = require('./components/Actions');
+
+var _Actions2 = _interopRequireDefault(_Actions);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _reactDom2.default.render(_react2.default.createElement(
@@ -223,5 +227,17 @@ _reactDom2.default.render(_react2.default.createElement(
 				)
 			)
 		)
+	),
+	_react2.default.createElement(
+		'h2',
+		null,
+		'Actions'
+	),
+	_react2.default.createElement(
+		'div',
+		null,
+		_react2.default.createElement(_Actions2.default, { onAction: function onAction(type) {
+				return alert('hello', type);
+			} })
 	)
 ), document.getElementById('pad'));

@@ -7,6 +7,7 @@ import Button from './components/Button';
 import Suggest from './components/Suggest';
 import Rating from './components/Rating';
 import FormInput from './components/FormInput';
+import Actions from './components/Actions';
 
 
 ReactDOM.render(
@@ -64,7 +65,8 @@ ReactDOM.render(
 	  	</tr>
 	  </tbody></table>
 
-	  
+	  <h2>Actions</h2>
+	  <div><Actions onAction={type => alert('hello', type)} /></div>
 	</div>,
   document.getElementById('pad')
 );
