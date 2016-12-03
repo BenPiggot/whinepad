@@ -5,9 +5,10 @@ import React, { Component, PropTypes } from 'react';
 class Form extends Component {
 	getData() {
 		let data = {};
-		this.props.fields.forEach(field => 
-			data[field.id] = this.refs[field.id]
-		);
+		this.props.fields.forEach(field => {
+			debugger
+			data[field.id] = this.refs[field.id].getValue()
+		});
 
 		return data;
 	};

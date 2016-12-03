@@ -44,7 +44,8 @@ var Form = function (_Component) {
 
 			var data = {};
 			this.props.fields.forEach(function (field) {
-				return data[field.id] = _this2.refs[field.id];
+				debugger;
+				data[field.id] = _this2.refs[field.id].getValue();
 			});
 
 			return data;
