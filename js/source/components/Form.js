@@ -6,7 +6,6 @@ class Form extends Component {
 	getData() {
 		let data = {};
 		this.props.fields.forEach(field => {
-			debugger
 			data[field.id] = this.refs[field.id].getValue()
 		});
 

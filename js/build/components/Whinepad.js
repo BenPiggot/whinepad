@@ -63,7 +63,7 @@ var Whinepad = function (_Component) {
 				this.setState({ addnew: false });
 				return;
 			}
-			debugger;
+
 			var data = Array.from(this.state.data);
 			data.unshift(this.refs.form.getData());
 			this.setState({

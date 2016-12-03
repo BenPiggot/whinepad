@@ -24,7 +24,7 @@ class Whinepad extends Component {
 			this.setState({addnew: false});
 			return
 		}
-		debugger
+
 		let data = Array.from(this.state.data);
 		data.unshift(this.refs.form.getData());
 		this.setState({

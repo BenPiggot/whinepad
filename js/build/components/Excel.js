@@ -80,7 +80,7 @@ var Excel = function (_Component) {
       var data = Array.from(this.state.data);
       var descending = this.state.sortby === key && !this.state.descending;
       data.sort(function (a, b) {
-        return descending ? a[column] < b[column] ? 1 : -1 : a[column] > b[column] ? 1 : -1;
+        return descending ? a[key] < b[key] ? 1 : -1 : a[key] > b[key] ? 1 : -1;
       });
 
       this.setState({
@@ -208,7 +208,8 @@ var Excel = function (_Component) {
           modal: true,
           header: readonly ? 'Item info' : 'Edit item',
           confirmLabel: readonly ? 'ok' : 'Save',
-          onAction: this._deleteConfirmationClick.bind(this)
+          hasCancel: !readonly,
+          onAction: this._saveDataDialog.bind(this)
         },
         _react2.default.createElement(_Form2.default, {
           ref: 'form',
