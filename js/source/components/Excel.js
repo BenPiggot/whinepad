@@ -139,7 +139,7 @@ class Excel extends Component {
         confirmLabel="Delete"
         onAction={this._deleteConfirmationClick.bind(this)}
       >
-        {`Are you sure you want to delete "${namegues}"`}
+        {`Are you sure you want to delete "${nameguess}"`}
       </Dialog>
     )
   };
