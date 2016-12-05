@@ -20,6 +20,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _CRUDStore = require('../flux/CRUDStore');
+
+var _CRUDStore2 = _interopRequireDefault(_CRUDStore);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -31,10 +35,16 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Form = function (_Component) {
 	_inherits(Form, _Component);
 
-	function Form() {
+	function Form(props) {
 		_classCallCheck(this, Form);
 
-		return _possibleConstructorReturn(this, (Form.__proto__ || Object.getPrototypeOf(Form)).apply(this, arguments));
+		var _this = _possibleConstructorReturn(this, (Form.__proto__ || Object.getPrototypeOf(Form)).call(this, props));
+
+		_this.fields = _CRUDStore2.default.getSchema();
+		if ('recordId' in _this.props) {
+			_this.initialData = _CRUDStore2.default.getRecord(_this.props.recordId);
+		}
+		return _this;
 	}
 
 	_createClass(Form, [{
@@ -43,7 +53,7 @@ var Form = function (_Component) {
 			var _this2 = this;
 
 			var data = {};
-			this.props.fields.forEach(function (field) {
+			this.fields.forEach(function (field) {
 				data[field.id] = _this2.refs[field.id].getValue();
 			});
 
@@ -57,8 +67,8 @@ var Form = function (_Component) {
 			return _react2.default.createElement(
 				'form',
 				{ className: 'Form' },
-				this.props.fields.map(function (field) {
-					var prefilled = _this3.props.initialData && _this3.props.initialData[field.id];
+				this.fields.map(function (field) {
+					var prefilled = _this3.initialData && _this3.initialData[field.id];
 					if (!_this3.props.readonly) {
 						return _react2.default.createElement(
 							'div',
@@ -95,16 +105,5 @@ var Form = function (_Component) {
 
 	return Form;
 }(_react.Component);
-
-Form.PropTypes = {
-	fields: _react.PropTypes.arrayOf(_react.PropTypes.shape({
-		id: _react.PropTypes.string.isRequired,
-		label: _react.PropTypes.string.isRequired,
-		type: _react.PropTypes.string,
-		options: _react.PropTypes.arrayOf(_react.PropTypes.string)
-	})).isRequired,
-	initialData: _react.PropTypes.object,
-	readonly: _react.PropTypes.bool
-};
 
 exports.default = Form;

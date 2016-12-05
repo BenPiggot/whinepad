@@ -36,6 +36,18 @@ var _classnames = require('classnames');
 
 var _classnames2 = _interopRequireDefault(_classnames);
 
+var _CRUDStore = require('../flux/CRUDStore');
+
+var _CRUDStore2 = _interopRequireDefault(_CRUDStore);
+
+var _CRUDActions = require('../flux/CRUDActions');
+
+var _CRUDActions2 = _interopRequireDefault(_CRUDActions);
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -49,49 +61,30 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Excel = function (_Component) {
   _inherits(Excel, _Component);
 
-  function Excel(props) {
+  function Excel() {
     _classCallCheck(this, Excel);
 
-    var _this = _possibleConstructorReturn(this, (Excel.__proto__ || Object.getPrototypeOf(Excel)).call(this, props));
+    var _this = _possibleConstructorReturn(this, (Excel.__proto__ || Object.getPrototypeOf(Excel)).call(this));
 
     _this.state = {
-      data: _this.props.initialData,
+      data: _CRUDStore2.default.getData(),
       sortby: null,
       descending: false,
       edit: null,
       dialog: null
     };
+
+    _this.schema = _CRUDStore2.default.getSchema();
+
+    _CRUDStore2.default.addListener('change', function () {
+      _this.setState({
+        data: _CRUDStore2.default.getData()
+      });
+    });
     return _this;
   }
 
   _createClass(Excel, [{
-    key: 'componentWillReceiveProps',
-    value: function componentWillReceiveProps(nextProps) {
-      this.setState({ data: nextProps.initialData });
-    }
-  }, {
-    key: '_fireDataChange',
-    value: function _fireDataChange(data) {
-      this.props.onDataChange(data);
-    }
-  }, {
-    key: '_sort',
-    value: function _sort(key) {
-      var data = Array.from(this.state.data);
-      var descending = this.state.sortby === key && !this.state.descending;
-      data.sort(function (a, b) {
-        return descending ? a[key] < b[key] ? 1 : -1 : a[key] > b[key] ? 1 : -1;
-      });
-
-      this.setState({
-        data: data,
-        sortby: key,
-        descending: descending
-      });
-
-      this._fireDataChange(data);
-    }
-  }, {
     key: '_showEditor',
     value: function _showEditor(e) {
       this.setState({ edit: {
@@ -103,15 +96,13 @@ var Excel = function (_Component) {
     key: '_save',
     value: function _save(e) {
       e.preventDefault();
-      var value = this.refs.input.getValue();
-      var data = Array.from(this.state.data);
-      data[this.state.edit.row][this.state.edit.key] = value;
-      this.setState({
-        edit: null,
-        data: data
-      });
+      (0, _invariant2.default)(this.state.edit, 'Messed up edit state');
 
-      this._fireDataChange(data);
+      _CRUDActions2.default.updateField(this.state.edit.row, this.state.edit.key, this.refs.input.getValue());
+
+      this.setState({
+        edit: null
+      });
     }
   }, {
     key: '_actionClick',
@@ -121,19 +112,15 @@ var Excel = function (_Component) {
   }, {
     key: '_deleteConfirmationClick',
     value: function _deleteConfirmationClick(action) {
+      this.setState({ dialog: null });
+
       if (action === 'dismiss') {
-        this._closeDialog();
         return;
       }
 
-      var data = Array.from(this.state.data);
-      data.splice(this.state.dialog.idx, 1);
-      this.setState({
-        dialog: null,
-        data: data
-      });
-
-      this._fireDataChange(data);
+      var index = this.state.dialog && this.state.dialog.idx;
+      (0, _invariant2.default)(typeof index === 'number', 'Unexpected dialog state');
+      _CRUDActions2.default.delete(index);
     }
   }, {
     key: '_closeDialog',
@@ -143,19 +130,25 @@ var Excel = function (_Component) {
   }, {
     key: '_saveDataDialog',
     value: function _saveDataDialog(action) {
+      this.setState({ dialog: null });
+
       if (action === 'dismiss') {
-        this._closeDialog();
         return;
       }
 
-      var data = Array.from(this.state.data);
-      data[this.state.dialog.idx] = this.refs.form.getData();
+      var index = this.state.dialog && this.state.dialog.idx;
+      (0, _invariant2.default)(typeof index === 'number', 'Unexpected dialog state');
+      _CRUDActions2.default.updateRecord(index, this.refs.form.getData());
+    }
+  }, {
+    key: '_sort',
+    value: function _sort(key) {
+      var descending = this.state.sortby === key && !this.state.descending;
+      _CRUDActions2.default.sort(key, descending);
       this.setState({
-        dialog: null,
-        data: data
+        sortby: key,
+        descending: descending
       });
-
-      this._fireDataChange(data);
     }
   }, {
     key: 'render',
@@ -196,12 +189,14 @@ var Excel = function (_Component) {
           confirmLabel: 'Delete',
           onAction: this._deleteConfirmationClick.bind(this)
         },
-        'Are you sure you want to delete "' + namegues + '"'
+        'Are you sure you want to delete "' + nameguess + '"'
       );
     }
   }, {
     key: '_renderFormDialog',
     value: function _renderFormDialog(readonly) {
+      var index = this.state.dialog && this.state.dialog.idx;
+      (0, _invariant2.default)(typeof index === 'number', 'Unexpected dialog state');
       return _react2.default.createElement(
         _Dialog2.default,
         {
@@ -213,9 +208,8 @@ var Excel = function (_Component) {
         },
         _react2.default.createElement(_Form2.default, {
           ref: 'form',
-          fields: this.props.schema,
-          initialData: this.state.data[this.state.dialog.idx],
-          readonly: readonly })
+          recordId: index,
+          readonly: !!readonly })
       );
     }
   }, {
@@ -232,7 +226,7 @@ var Excel = function (_Component) {
           _react2.default.createElement(
             'tr',
             null,
-            this.props.schema.map(function (item) {
+            this.schema.map(function (item) {
               if (!item.show) return null;
 
               var title = item.label;
@@ -265,7 +259,7 @@ var Excel = function (_Component) {
               Object.keys(row).map(function (cell, idx) {
                 var _classNames;
 
-                var schema = _this2.props.schema[idx];
+                var schema = _this2.schema[idx];
                 if (!schema || !schema.show) return null;
 
                 var isRating = schema.type === 'rating';
@@ -309,11 +303,5 @@ var Excel = function (_Component) {
 }(_react.Component);
 
 ;
-
-Excel.PropTypes = {
-  schema: _react.PropTypes.arrayOf(_react.PropTypes.object),
-  initialData: _react.PropTypes.arrayOf(_react.PropTypes.object),
-  onDataChange: _react.PropTypes.func
-};
 
 exports.default = Excel;

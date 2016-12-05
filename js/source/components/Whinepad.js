@@ -3,16 +3,23 @@ import Dialog from './Dialog';
 import Excel from './Excel';
 import Form from './Form';
 import React, { Component, PropTypes } from 'react';
+import CRUDStore from '../flux/CRUDStore';
+import CRUDActions from '../flux/CRUDActions';
+
 
 class Whinepad extends Component {
-	constructor(props) {
-		super(props);
+	constructor() {
+		super();
 		this.state = {
-			data: props.initialData,
+			count: CRUDStore.getCount(),
 			addnew: false
 		}
 
-		this._preSearchData = null;
+		CRUDStore.addListener('change', () => {
+			this.setState({
+				count: CRUDStore.getCount()
+			})
+		})
 	};
 
 	_addNewDialog() {
@@ -20,61 +27,13 @@ class Whinepad extends Component {
 	};
 
 	_addNew(action) {
-		if (action === 'dismiss') {
-			this.setState({addnew: false});
-			return
+		this.setState({addnew: false});
+		if (action === 'confirm') {
+			CRUDActions.create(this.refs.form.getData());
 		}
-
-		let data = Array.from(this.state.data);
-		data.unshift(this.refs.form.getData());
-		this.setState({
-			addnew: false,
-			data: data
-		});
-
-		this._commitToStorage(data);
-	};
-
-	_onExcelDataChange(data) {
-		this.setState({ data: data });
-		this._commitToStorage(data);
-	};
-
-	_commitToStorage(data) {
-		localStorage.setItem('data', JSON.stringify(data));
-	};
-
-	_startSearching() {
-		this._preSearchData = this.state.data;
-	};
-
-	_doneSearching() {
-		this.setState({
-			data: this._preSearchData
-		})
-	};
-
-	_search(e) {
-		const needle = e.target.value.toLowerCase();
-		if (!needle) {
-			this.setState({ data: this._preSearchData });
-			return;
-		}
-
-		const fields = this.props.schema.map(item => item.id);
-		const searchData = this._preSearchData.filter(row => {
-			for (let f = 0; f < fields.length; f++) {
-				if (row[fields[f]].toString().toLowerCase().indexOf(needle) > -1) {
-					return true;
-				}
-			}
-			return false;
-		});
-		this.setState({data: searchData})
 	};
 
 	render() {
-		console.log(this.state.data)
 		return (
 			<div className="Whinepad">
 				<div className="WhinepadToolbar">
@@ -87,17 +46,16 @@ class Whinepad extends Component {
 					</div>
 					<div className="WhinepadToolbarSearch">
 						<input
-							placeholder="Search..."
-							onChange={this._search.bind(this)}
-							onFocus={this._startSearching.bind(this)}
-							onBlur={this._doneSearching.bind(this)} />
+              placeholder={this.state.count === 1
+                ? 'Search 1 record...'
+                : `Search ${this.state.count} records...`
+              } 
+              onChange={CRUDActions.search.bind(CRUDActions)}
+              onFocus={CRUDActions.startSearching.bind(CRUDActions)} />
 					</div>
 				</div>
 				<div className="WhinepadDatagrid">
-					<Excel 
-						schema={this.props.schema}
-						initialData={this.state.data}
-						onDataChange={this._onExcelDataChange.bind(this)} />
+					<Excel />
 				</div>
 				{ this.state.addnew ? 
 					<Dialog
@@ -106,9 +64,7 @@ class Whinepad extends Component {
 						confirmLabel="Add"
 						onAction={this._addNew.bind(this)}
 					>
-						<Form
-							ref="form"
-							fields={this.props.schema} />
+						<Form ref="form" />
 					</Dialog> : 
 					null
 				}
@@ -117,14 +73,5 @@ class Whinepad extends Component {
 	}
 };
 
-
-Whinepad.PropTypes = {
-	schema: PropTypes.arrayOf(
-		PropTypes.object
-	),
-	initialData: PropTypes.arrayOf(
-		PropTypes.object
-	)
-};
 
 export default Whinepad

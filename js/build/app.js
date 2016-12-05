@@ -12,6 +12,10 @@ var _Logo = require('./components/Logo');
 
 var _Logo2 = _interopRequireDefault(_Logo);
 
+var _CRUDStore = require('./flux/CRUDStore');
+
+var _CRUDStore2 = _interopRequireDefault(_CRUDStore);
+
 var _Whinepad = require('./components/Whinepad');
 
 var _Whinepad2 = _interopRequireDefault(_Whinepad);
@@ -24,15 +28,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var data = JSON.parse(localStorage.getItem('data'));
 
-if (!data) {
-	data = {};
-	_schema2.default.forEach(function (item) {
-		return data[item.id] = item.sample;
-	});
-	data = [data];
-}
+_CRUDStore2.default.init(_schema2.default);
 
-console.log(data);
 _reactDom2.default.render(_react2.default.createElement(
 	'div',
 	null,
@@ -42,5 +39,5 @@ _reactDom2.default.render(_react2.default.createElement(
 		_react2.default.createElement(_Logo2.default, null),
 		' Welcome to Whinepad!'
 	),
-	_react2.default.createElement(_Whinepad2.default, { schema: _schema2.default, initialData: data })
+	_react2.default.createElement(_Whinepad2.default, null)
 ), document.getElementById('pad'));

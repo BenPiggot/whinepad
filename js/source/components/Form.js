@@ -1,11 +1,20 @@
 import FormInput from './FormInput';
 import Rating from './Rating';
 import React, { Component, PropTypes } from 'react';
+import CRUDStore from '../flux/CRUDStore';
 
 class Form extends Component {
+	constructor(props) {
+		super(props);
+		this.fields = CRUDStore.getSchema();
+		if ('recordId' in this.props) {
+			this.initialData = CRUDStore.getRecord(this.props.recordId)
+		}
+	};
+
 	getData() {
 		let data = {};
-		this.props.fields.forEach(field => {
+		this.fields.forEach(field => {
 			data[field.id] = this.refs[field.id].getValue()
 		});
 
@@ -14,8 +23,8 @@ class Form extends Component {
 
 	render() {
 		return (
-			<form className="Form">{this.props.fields.map(field => {
-				const prefilled = this.props.initialData && this.props.initialData[field.id];
+			<form className="Form">{this.fields.map(field => {
+				const prefilled = this.initialData && this.initialData[field.id];
 				if (!this.props.readonly) {
 					return (
 						<div className="FormRow" key={field.id}>
@@ -44,15 +53,6 @@ class Form extends Component {
 	};
 }
 
-Form.PropTypes = {
-	fields: PropTypes.arrayOf( PropTypes.shape({
-		id: PropTypes.string.isRequired,
-		label: PropTypes.string.isRequired,
-		type: PropTypes.string,
-		options: PropTypes.arrayOf(PropTypes.string)
-	})).isRequired,
-	initialData: PropTypes.object,
-	readonly: PropTypes.bool
-};
+
 
 export default Form

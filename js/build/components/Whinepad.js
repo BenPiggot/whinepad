@@ -26,6 +26,14 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _CRUDStore = require('../flux/CRUDStore');
+
+var _CRUDStore2 = _interopRequireDefault(_CRUDStore);
+
+var _CRUDActions = require('../flux/CRUDActions');
+
+var _CRUDActions2 = _interopRequireDefault(_CRUDActions);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -37,17 +45,21 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Whinepad = function (_Component) {
 	_inherits(Whinepad, _Component);
 
-	function Whinepad(props) {
+	function Whinepad() {
 		_classCallCheck(this, Whinepad);
 
-		var _this = _possibleConstructorReturn(this, (Whinepad.__proto__ || Object.getPrototypeOf(Whinepad)).call(this, props));
+		var _this = _possibleConstructorReturn(this, (Whinepad.__proto__ || Object.getPrototypeOf(Whinepad)).call(this));
 
 		_this.state = {
-			data: props.initialData,
+			count: _CRUDStore2.default.getCount(),
 			addnew: false
 		};
 
-		_this._preSearchData = null;
+		_CRUDStore2.default.addListener('change', function () {
+			_this.setState({
+				count: _CRUDStore2.default.getCount()
+			});
+		});
 		return _this;
 	}
 
@@ -59,69 +71,14 @@ var Whinepad = function (_Component) {
 	}, {
 		key: '_addNew',
 		value: function _addNew(action) {
-			if (action === 'dismiss') {
-				this.setState({ addnew: false });
-				return;
+			this.setState({ addnew: false });
+			if (action === 'confirm') {
+				_CRUDActions2.default.create(this.refs.form.getData());
 			}
-
-			var data = Array.from(this.state.data);
-			data.unshift(this.refs.form.getData());
-			this.setState({
-				addnew: false,
-				data: data
-			});
-
-			this._commitToStorage(data);
-		}
-	}, {
-		key: '_onExcelDataChange',
-		value: function _onExcelDataChange(data) {
-			this.setState({ data: data });
-			this._commitToStorage(data);
-		}
-	}, {
-		key: '_commitToStorage',
-		value: function _commitToStorage(data) {
-			localStorage.setItem('data', JSON.stringify(data));
-		}
-	}, {
-		key: '_startSearching',
-		value: function _startSearching() {
-			this._preSearchData = this.state.data;
-		}
-	}, {
-		key: '_doneSearching',
-		value: function _doneSearching() {
-			this.setState({
-				data: this._preSearchData
-			});
-		}
-	}, {
-		key: '_search',
-		value: function _search(e) {
-			var needle = e.target.value.toLowerCase();
-			if (!needle) {
-				this.setState({ data: this._preSearchData });
-				return;
-			}
-
-			var fields = this.props.schema.map(function (item) {
-				return item.id;
-			});
-			var searchData = this._preSearchData.filter(function (row) {
-				for (var f = 0; f < fields.length; f++) {
-					if (row[fields[f]].toString().toLowerCase().indexOf(needle) > -1) {
-						return true;
-					}
-				}
-				return false;
-			});
-			this.setState({ data: searchData });
 		}
 	}, {
 		key: 'render',
 		value: function render() {
-			console.log(this.state.data);
 			return _react2.default.createElement(
 				'div',
 				{ className: 'Whinepad' },
@@ -143,19 +100,15 @@ var Whinepad = function (_Component) {
 						'div',
 						{ className: 'WhinepadToolbarSearch' },
 						_react2.default.createElement('input', {
-							placeholder: 'Search...',
-							onChange: this._search.bind(this),
-							onFocus: this._startSearching.bind(this),
-							onBlur: this._doneSearching.bind(this) })
+							placeholder: this.state.count === 1 ? 'Search 1 record...' : 'Search ' + this.state.count + ' records...',
+							onChange: _CRUDActions2.default.search.bind(_CRUDActions2.default),
+							onFocus: _CRUDActions2.default.startSearching.bind(_CRUDActions2.default) })
 					)
 				),
 				_react2.default.createElement(
 					'div',
 					{ className: 'WhinepadDatagrid' },
-					_react2.default.createElement(_Excel2.default, {
-						schema: this.props.schema,
-						initialData: this.state.data,
-						onDataChange: this._onExcelDataChange.bind(this) })
+					_react2.default.createElement(_Excel2.default, null)
 				),
 				this.state.addnew ? _react2.default.createElement(
 					_Dialog2.default,
@@ -165,9 +118,7 @@ var Whinepad = function (_Component) {
 						confirmLabel: 'Add',
 						onAction: this._addNew.bind(this)
 					},
-					_react2.default.createElement(_Form2.default, {
-						ref: 'form',
-						fields: this.props.schema })
+					_react2.default.createElement(_Form2.default, { ref: 'form' })
 				) : null
 			);
 		}
@@ -177,10 +128,5 @@ var Whinepad = function (_Component) {
 }(_react.Component);
 
 ;
-
-Whinepad.PropTypes = {
-	schema: _react.PropTypes.arrayOf(_react.PropTypes.object),
-	initialData: _react.PropTypes.arrayOf(_react.PropTypes.object)
-};
 
 exports.default = Whinepad;
