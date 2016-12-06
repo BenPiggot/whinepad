@@ -179,7 +179,8 @@ var Excel = function (_Component) {
   }, {
     key: '_renderDeleteDialog',
     value: function _renderDeleteDialog() {
-      var first = this.state.data[this.state.dialog.idx];
+      var index = this.state.dialog && this.state.dialog.idx;
+      var first = this.state.data.get(index);
       var nameguess = first[Object.keys(first)[0]];
       return _react2.default.createElement(
         _Dialog2.default,

@@ -1,4 +1,5 @@
 import { EventEmitter } from 'fbemitter';
+import { List } from 'immutable';
 
 let data;
 let schema;
@@ -23,11 +24,11 @@ const CRUDStore = {
 	},
 
 	getCount() {
-		return data.length;
+		return data.count();
 	},
 
 	getRecord(recordID) {
-		return recordID in data ? data[recordID] : null;
+		return data.get(recordID);
 	},
 
 	init(initialSchema) {
@@ -37,10 +38,11 @@ const CRUDStore = {
 			null;
 
 		if (!storage) {
-			data = [{}];
-			schema.forEach(item => data[0][item.id] = item.sample);
+			let initialRecord = {};
+			schema.forEach(item => initialRecord[item.id] = item.sample);
+			data = List([initialRecord]);
 		} else {
-			data = JSON.parse(storage);
+			data = List(JSON.parse(storage));
 		}
 	},
 

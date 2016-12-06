@@ -8,28 +8,25 @@ var _CRUDStore = require('./CRUDStore');
 
 var _CRUDStore2 = _interopRequireDefault(_CRUDStore);
 
+var _immutable = require('immutable');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var CRUDActions = {
 	create: function create(newRecord) {
-		var data = _CRUDStore2.default.getData();
-		data.unshift(newRecord);
-		_CRUDStore2.default.setData(data);
+		_CRUDStore2.default.setData(_CRUDStore2.default.getData().unshift(newRecord), true);
 	},
 	delete: function _delete(recordId) {
 		var data = _CRUDStore2.default.getData();
-		data.splice(recordId, 1);
-		_CRUDStore2.default.setData(data);
+		_CRUDStore2.default.setData(data.remove(recordId), true);
 	},
 	updateRecord: function updateRecord(recordId, newRecord) {
-		var data = _CRUDStore2.default.getData();
-		data[recordId] = newRecord;
-		_CRUDStore2.default.setData(data);
+		_CRUDStore2.default.setData(_CRUDStore2.default.getData().set(recordId, newRecord), true);
 	},
 	updateField: function updateField(recordId, key, value) {
-		var data = _CRUDStore2.default.getData();
-		data[recordId][key] = value;
-		_CRUDStore2.default.setData(data);
+		var record = _CRUDStore2.default.getData().get(recordId);
+		record[key] = value;
+		_CRUDStore2.default.setData(_CRUDStore2.default.getData().set(recordId, record), true);
 	},
 
 

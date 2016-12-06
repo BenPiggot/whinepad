@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _fbemitter = require('fbemitter');
 
+var _immutable = require('immutable');
+
 var data = void 0;
 var schema = void 0;
 
@@ -26,22 +28,25 @@ var CRUDStore = {
 		emitter.emit('change');
 	},
 	getCount: function getCount() {
-		return data.length;
+		return data.count();
 	},
 	getRecord: function getRecord(recordID) {
-		return recordID in data ? data[recordID] : null;
+		return data.get(recordID);
 	},
 	init: function init(initialSchema) {
 		schema = initialSchema;
 		var storage = 'localStorage' in window ? localStorage.getItem('data') : null;
 
 		if (!storage) {
-			data = [{}];
-			schema.forEach(function (item) {
-				return data[0][item.id] = item.sample;
-			});
+			(function () {
+				var initialRecord = {};
+				schema.forEach(function (item) {
+					return initialRecord[item.id] = item.sample;
+				});
+				data = (0, _immutable.List)([initialRecord]);
+			})();
 		} else {
-			data = JSON.parse(storage);
+			data = (0, _immutable.List)(JSON.parse(storage));
 		}
 	},
 	addListener: function addListener(eventType, fn) {

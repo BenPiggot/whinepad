@@ -119,7 +119,8 @@ class Excel extends Component {
   };
 
   _renderDeleteDialog() {
-    const first = this.state.data[this.state.dialog.idx];
+    const index = this.state.dialog && this.state.dialog.idx;
+    const first = this.state.data.get(index);
     const nameguess = first[Object.keys(first)[0]];
     return (
       <Dialog
